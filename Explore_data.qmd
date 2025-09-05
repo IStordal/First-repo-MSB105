@@ -90,7 +90,7 @@ unemp99to02 <- ApiData12(
   Alder = c("15-74", "15-29"),
   # select 1999M01:2002M12
   Tid = c(paste(
-    rep(1999:2002, each = 12), 
+    rep(1999:2005, each = 12), 
     "M",
     sprintf("%02d", 1:12), 
     sep = "")
@@ -98,5 +98,9 @@ unemp99to02 <- ApiData12(
   ) |> 
   # convert from dataframe to tibble
   as_tibble()
+```
+
+```{r}
+ paste(rep(1999:2002, each = 12), "M", sep = "")
 ```
 
