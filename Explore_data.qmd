@@ -103,4 +103,3 @@ unemp99to02 <- ApiData12(
 ```{r}
  paste(rep(1999:2002, each = 12), "M", sep = "")
 ```
-test, slett denne teksten
