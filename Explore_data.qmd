@@ -9,6 +9,7 @@ editor: visual
 library(tidyverse)
 library(readxl)
 library(writexl)
+library(PxWebApiData)
 ```
 
 ## Leser in SSB data
@@ -59,4 +60,4 @@ write_xlsx(
 ```{r}
 write_csv(ssb10540, file = "ssb10540,csv")
 ```
-
+   
