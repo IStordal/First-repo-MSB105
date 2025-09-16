@@ -1,0 +1,22 @@
+---
+title: "ggplot"
+format: html
+editor: visual
+---
+
+## ggplot
+
+```{r}
+library(ggplot2)
+library(tinytex)
+library(tidyverse)
+library(ggpubr)
+```
+
+```{r}
+ggplot(data = mtcars)
+```
+
+```{r}
+ggplot(data = mtcars, mapping = aes(x = disp, y = mpg))
+```
