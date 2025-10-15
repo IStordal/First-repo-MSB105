@@ -1,0 +1,233 @@
+---
+title: "Transforming data"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: setup
+library(nycflights13)
+
+```
+
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+library(ViewPipeSteps)
+```
+
+## Transforming data
+
+
+```{r}
+set.seed(1234)
+res_mean_rnorm_3dig <- paste("Result:", round(mean(rnorm(n = 10, mean = 0, sd = 1)), digits = 3), sep = "")
+res_mean_rnorm_3dig
+```
+
+
+```{r}
+set.seed(1234)
+res_rnorm <- rnorm(n = 10, mean = 0, sd = 1)
+res_mean_rnorm <- mean(res_rnorm)
+res_mean_rnorm_3dig <- round(res_mean_rnorm, digits = 3)
+res_mean_rnorm_3dig_string <- paste("Result:", res_mean_rnorm_3dig, sep = "")
+# print result
+res_mean_rnorm_3dig_string
+```
+
+```{r}
+# cleanup
+rm(res_rnorm, res_mean_rnorm, res_mean_rnorm_3dig, res_mean_rnorm_3dig_string)
+```
+
+
+## Pipes
+## Legger inn i pipen min ved <-
+## Heller det inn i pipen med %>%
+
+```{r}
+set.seed(1234)
+res_mean_rnorm_3dig_string <- 
+  rnorm(n = 10, mean = 0, sd = 1) %>%
+  mean() %>%
+  round(digits = 3) %>% 
+  # The dot '.' is to show where the content of the pipe should be put
+  paste("Result:", .)
+res_mean_rnorm_3dig_string
+```
+
+## Hva som skjer hvis du ikke bruker . ved result
+
+```{r}
+set.seed(1234)
+res_mean_rnorm_3dig_string <- 
+  rnorm(n = 10, mean = 0, sd = 1) %>%
+  mean() %>%
+  round(digits = 3) %>% 
+  # The dot '.' is to show where the content of the pipe should be put
+  paste("Result:")
+res_mean_rnorm_3dig_string
+```
+
+```{r}
+flights %>% dim()
+```
+
+```{r}
+#| paged.print: false
+flights %>% as_tibble()
+```
+
+
+## Filter commands
+
+```{r}
+#| paged.print: false
+print(
+  filter(flights, month == 1, day == 1))
+```
+
+## cmd + shift + m gir pipe funksjon |> 
+
+```{r}
+flights |>
+  filter(month == 1, day == 1) |> 
+print(n = 5)
+```
+
+```{r}
+
+flights |> 
+filter(
+  month == 1, day %in% c(1, 15, 30)
+) |> 
+  print(
+    n = 7,
+    width = 60
+  )
+```
+
+## sortert etter de siste
+```{r}
+#| paged.print: false
+flights |>
+  filter(
+    month == 1,
+    day %in% c(1, 15, 30)
+    ) |> 
+    tail(n = 7)
+```
+
+## sortert etter dag og departure tid
+```{r}
+#| paged.print: false
+flights |>
+  filter(
+    month == 1,
+    day %in% c(1, 15, 30)
+    ) |> 
+  arrange(desc(day), desc(dep_time))
+```
+```{r}
+#| paged.print: false
+set.seed(42)
+flights |>
+  filter(month == 1, day %in% c(1, 15, 30)) |> 
+  slice_sample(n = 10) |> 
+  arrange(day, dep_time)
+```
+# How many flights were there in April and September (total?)
+
+```{r}
+#| paged.print: false
+  flights |> 
+  filter(month %in% c(4, 9)) |>
+    count()
+```
+# How many flights were there in each of the months from April to September?
+
+```{r}
+#| paged.print: false
+  flights |> 
+  filter(month %in% 4:9) |>
+    group_by(month) |> 
+    summarize(antall = n())
+```
+# How many flights were there in total the first two days of each month?
+
+```{r}
+#| paged.print: false
+flights |> 
+  filter(day %in% c(1,2)) |> 
+    group_by(month, origin) |> 
+    summarize(antall = n()) |> 
+```
+
+# how many flights were there in total the first day of the month?
+
+```{r}
+#| paged.print: false
+flights |> 
+  filter(day %in% c(1)) |> 
+    summarize(antall = n())
+```
+# How manby flights were there in total the first day of the months for each airport in NYC?
+
+```{r}
+#| paged.print: false
+flights |> 
+  filter(day %in% c(1)) |>
+  group_by(origin) |> 
+    summarize(antall = n())
+```
+
+
+
+# How many flights were there in the last day of each month for each airport?
+
+```{r}
+#| paged.print: false
+flights |>
+  group_by(month, origin) |> 
+  filter(day == max(day)) |> 
+  summarise(antall = n()) |> 
+  print(n = 40)
+```
+
+# test
+
+```{r}
+#| paged.print: false
+flights |>
+  filter(month == 1 & day == 31) |> 
+  group_by(origin) |> 
+  summarise(antall = n())
+```
+
+# How many flights were there during 2013 that had an arrival delay greater than or equal to 15 min., but less than 30 min.? (feil, ikke ferdig)
+
+```{r}
+head(flights)
+```
+
+# Hvor mange % det er som var forsinket ved hver flyplass
+```{r}
+#| paged.print: false
+delays <- flights |>
+  filter(arr_delay >= 15 & arr_delay < 30) |>
+  group_by(origin) |> 
+  count() |> 
+  pull()
+
+flights_orig <- flights |>
+  group_by(origin) |> 
+  summarise(antall = n()) |> 
+  pull()
+
+round(100 * delays/nrow(flights), 2)
+```
+
+
+

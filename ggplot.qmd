@@ -7,6 +7,12 @@ editor: visual
 ## ggplot
 
 ```{r}
+#| label: setup
+#| message: false
+```
+
+
+```{r}
 library(ggplot2)
 library(tinytex)
 library(tidyverse)
@@ -20,3 +26,227 @@ ggplot(data = mtcars)
 ```{r}
 ggplot(data = mtcars, mapping = aes(x = disp, y = mpg))
 ```
+# Mapping in geom_point
+
+```{r}
+
+gg1 <-   ggplot(data = mtcars, mapping = aes(x = disp, y = mpg)) +
+  geom_point()
+
+gg2 <-   ggplot(data = mtcars) +
+  geom_point(mapping = aes(x = disp, y = mpg))
+
+ggarrange(gg1, gg2, labels = c("mapping = aes in ggplot", "mapping = aes in geom_*"),
+          nrow = 1)
+```
+
+```{r}
+## combine aes
+gg3 <-   ggplot(data = mtcars, mapping = aes(x = disp, colour = factor(cyl))) +
+##  geom_point(data = mtcars, mapping = aes(y = mpg), col = 'blue')
+  geom_point(data = mtcars, mapping = aes(y = mpg))
+
+gg3
+```
+
+```{r}
+#inherit.aes    = FALSE, overrides the default aesthetics, rather than combining with them.
+gg4 <-   ggplot(data =  mtcars, mapping = aes(x = disp, colour = factor(cyl))) +
+##  geom_point(data = mtcars, mapping = aes(y = mpg), col = 'blue')
+  geom_point(data = mtcars, mapping = aes(x = qsec, y = mpg), show.legend = TRUE, inherit.aes = FALSE)
+
+gg4
+```
+
+
+```{r}
+## x = disp removed from ggplot
+gg5 <-   ggplot(data = mtcars, mapping = aes(colour = factor(cyl))) +
+##  geom_point(data = mtcars, mapping = aes(y = mpg), col = 'blue')
+  geom_point(mapping = aes(x = qsec, y = mpg), show.legend = TRUE, inherit.aes = FALSE)
+
+ggarrange(gg3, gg4, gg5, labels = c("inherit.aes = TRUE\n(default)", "inherit.aes = FALSE", "no x = disp\nin ggplot"),
+          nrow = 1)
+```
+
+```{r}
+ggplot() +
+  geom_point(data = mtcars, mapping = aes(x = disp, y = mpg, colour = factor(cyl), size = qsec))
+```
+
+
+```{r}
+ggplot() +
+  geom_point(data = mtcars,
+             mapping = aes(x = disp, y = mpg, colour = factor(cyl), alpha = 3.6*(0.25*1609.347)/qsec,
+                           shape = factor(ifelse(am, "Man", "Aut"))), size=4) +
+  labs(colour = "cyl", size = "speed\n(km/h)", shape = "trans-\nmission")
+```
+
+
+```{r}
+ggplot() +
+  geom_point(
+    data = mtcars,
+    mapping = aes(
+      x = disp,
+      y = mpg, 
+      colour = factor(cyl), 
+      size = 3.6*(0.25*1609.347)/qsec, 
+      shape = factor(
+        # Note codeing am
+        # 0 automatic, 1 manual
+        ifelse(
+          am, 
+          "Aut", 
+          "Man"
+          )
+        )
+      )
+    ) +
+  labs(
+    colour = "cyl", 
+    size = "speed\n(km/h)", 
+    shape = "trans-\nmission"
+    ) +
+  geom_smooth(
+    data = mtcars, 
+    mapping = aes(x = disp, y = mpg)
+    )
+```
+
+
+```{r}
+ggplot(
+  data = mtcars, 
+  mapping = aes(
+    x = hp, 
+    y = 1609.347/(2*qsec^2)
+    )
+  ) +
+  facet_wrap(~cut_number(wt, n =3)) +
+  geom_point(
+    aes(colour = cut_number(
+      wt, 
+      n = 3)
+      )
+    ) +
+  geom_smooth(
+    method = "lm", 
+    se = FALSE
+    )
+```
+
+
+```{r}
+#new dataframe to use for the grey points
+hp_acc <- data.frame(
+  hp = mtcars$hp, 
+  acc = 1609.347/(2*mtcars$qsec^2)
+  )
+
+ggplot(
+  data = mtcars, 
+  mapping = aes(
+x = hp, 
+y = 1609.347/(2*qsec^2),
+colour = cut_number(
+      wt, 
+      n = 3, 
+      labels = c("Light", "Medium", "Heavy")
+      )
+    )
+  ) +
+  geom_point(
+    data = hp_acc, 
+    mapping = aes(x = hp, y = acc), colour = "grey80"
+    ) +
+  facet_wrap(
+    ~cut_number(
+      wt, 
+      n =3 , 
+      labels = c("Light", "Medium", "Heavy")
+      )
+    ) +
+  geom_point(
+    mapping = aes(
+      ),
+    show.legend = FALSE
+    ) +
+  geom_smooth(
+    method = "lm", 
+    se = FALSE
+    ) +
+  labs(
+    y = "Mean acceleration (m/s^2)", 
+    colour = "Weight"
+    )
+```
+
+
+
+```{r}
+my_heights <- modelr::heights
+```
+
+```{r}
+hist3 <- ggplot(my_heights, mapping = aes(x = income)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+hist4 <- ggplot(my_heights, mapping = aes(x = height)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+hist5 <- ggplot(my_heights, mapping = aes(x = weight)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+gridExtra::grid.arrange(hist3, hist4, hist5, nrow = 1)
+```
+
+
+
+```{r}
+my_heights %>% 
+  mutate(
+    edu_fac = cut(education, 
+                  breaks = c(0, 12, 14, 16, 21), 
+                  labels = c("NotHS", "NotTC", "NotC", "C+"),
+                  right = FALSE) 
+  ) %>% 
+  filter(income > 0 & !is.na(weight) & !is.na(afqt) & !is.na(edu_fac)) %>%
+ggplot(mapping = aes(x = income, y = ..density..)) +
+  geom_freqpoly(mapping = aes(colour = edu_fac), binwidth = 10000)
+```
+
+```{r}
+my_heights %>% 
+  mutate(
+    edu_fac = cut(education, 
+                  breaks = c(0, 12, 14, 16, 21), 
+                  labels = c("NotHS", "NotTC", "NotC", "C+"),
+                  right = FALSE) 
+  ) %>% 
+  filter(income > 0 & !is.na(weight) & !is.na(afqt) & !is.na(edu_fac)) %>%
+ggplot(mapping = aes(x = income, y = ..density..)) +
+  geom_freqpoly(mapping = aes(colour = edu_fac), binwidth = 20000)
+```
+
+
+
+```{r}
+my_heights %>% 
+  mutate(
+    edu_fac = cut(education, 
+                  breaks = c(0, 12, 14, 16, 21), 
+                  labels = c("NotHS", "NotTC", "NotC", "C+"),
+                  right = FALSE) 
+  ) %>% 
+  filter(income > 0 & !is.na(weight) & !is.na(afqt) & !is.na(edu_fac)) %>%
+  ggplot() +
+  geom_count(mapping = aes(x = marital, y = edu_fac))
+```
+
+
+```{r}
+my_heights %>% 
+  filter(income > 0 & !is.na(weight) & !is.na(afqt) & !is.na(education)) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = education, y = income), alpha = 0.05)
+```
+

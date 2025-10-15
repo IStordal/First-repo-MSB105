@@ -1,0 +1,67 @@
+---
+title: "Tibbles"
+format: html
+editor: visual
+---
+
+## Tibbles
+
+
+```{r}
+#| Label: setup
+library(tidyverse)
+options(paged.print = FALSE)
+
+```
+
+```{r}
+mtcars |> 
+  class()
+```
+
+```{r}
+mtcars_tib <- mtcars |> 
+  as_tibble()
+```
+
+```{r}
+mtcars |> 
+  _[c("hp", "wt")] |> 
+  head(n = 5)
+```
+```{r}
+mtcars |> 
+  _[["hp"]] |> 
+  head(n = 5) |> 
+  class()
+```
+
+```{r}
+mtcars |> 
+  _[["hp"]] |> 
+  head(n = 5) |> 
+  length()
+```
+
+```{r}
+mtcars |> 
+  as_tibble() |> 
+  _["hp"] |> 
+  head(n = 5) |> 
+  dim()
+```
+
+
+# tidyverse versjon. Kan bare bruke pull på 1 faktor.
+```{r}
+mtcars |> 
+  as_tibble() |> 
+  select(hp) |> 
+  pull()
+```
+
+# Et annet alternativ
+```{r}
+mtcars$hp
+```
+
